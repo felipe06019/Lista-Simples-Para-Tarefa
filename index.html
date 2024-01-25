@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tarefas</title>
+    <style>
+      body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f8f8;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.task-container {
+    max-width: 400px;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #333;
+}
+
+.task-list {
+    list-style: none;
+    padding: 0;
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.task-item:hover {
+    background-color: #f2f2f2;
+}
+
+.task-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.task-item button {
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.task-item button:hover {
+    background-color: #d14040;
+}
+
+.add-task-form {
+    display: flex;
+    margin-top: 20px;
+}
+
+.add-task-form input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.add-task-form button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.add-task-form button:hover {
+    background-color: #45a049;
+}
+    </style>
+</head>
+<body>
+
+<div class="task-container">
+    <h2 style="color: #4caf50;">Lista de Tarefas</h2>
+
+    <ul class="task-list" id="taskList">
+        <!-- Lista de tarefas será adicionada aqui dinamicamente -->
+    </ul>
+
+    <div class="add-task-form">
+        <input type="text" id="taskInput" placeholder="Nova tarefa" />
+        <button onclick="addTask()">Adicionar</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Recupera a lista de tarefas do localStorage
+        const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        // Adiciona as tarefas salvas à lista
+        const taskList = document.getElementById('taskList');
+        savedTasks.forEach(task => addTaskToDOM(task));
+
+        // Adiciona uma nova tarefa
+        window.addTask = function () {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (taskText !== '') {
+                const newTask = { text: taskText, completed: false };
+                savedTasks.push(newTask);
+
+                // Atualiza o localStorage com a nova lista de tarefas
+                localStorage.setItem('tasks', JSON.stringify(savedTasks));
+
+                // Adiciona a nova tarefa à lista na página
+                addTaskToDOM(newTask);
+
+                // Limpa o campo de entrada
+                taskInput.value = '';
+            }
+        };
+
+        // Remove uma tarefa
+        window.removeTask = function (index) {
+            savedTasks.splice(index, 1);
+
+            // Atualiza o localStorage com a nova lista de tarefas
+            localStorage.setItem('tasks', JSON.stringify(savedTasks));
+
+            // Remove a tarefa da lista na página
+            const taskItem = document.getElementById(`taskItem${index}`);
+            taskItem.parentNode.removeChild(taskItem);
+        };
+
+        // Marca uma tarefa como concluída
+        window.toggleTask = function (index) {
+    savedTasks[index].completed = !savedTasks[index].completed;
+
+    // Atualiza o localStorage com a nova lista de tarefas
+    localStorage.setItem('tasks', JSON.stringify(savedTasks));
+
+    // Atualiza a aparência da tarefa na lista na página
+    const taskItem = document.getElementById(`taskItem${index}`);
+    taskItem.classList.toggle('completed');
+};
+
+
+        // Função auxiliar para adicionar tarefa à lista na página
+        function addTaskToDOM(task) {
+            const taskItem = document.createElement('li');
+            taskItem.id = `taskItem${savedTasks.indexOf(task)}`;
+            taskItem.className = 'task-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.completed;
+            checkbox.addEventListener('change', () => toggleTask(savedTasks.indexOf(task)));
+
+            const taskText = document.createElement('span');
+            taskText.textContent = task.text;
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remover';
+            removeButton.addEventListener('click', () => removeTask(savedTasks.indexOf(task)));
+
+            taskItem.appendChild(checkbox);
+            taskItem.appendChild(taskText);
+            taskItem.appendChild(removeButton);
+
+            if (task.completed) {
+                taskItem.classList.add('completed');
+            }
+
+            taskList.appendChild(taskItem);
+        }
+    });
+</script>
+
+</body>
+</html>
